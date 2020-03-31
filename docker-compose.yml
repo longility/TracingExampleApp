@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  tracingexampleapp:
+    image: ${DOCKER_REGISTRY-}tracingexampleapp
+    build:
+      context: .
+      dockerfile: TracingExampleApp/Dockerfile
+  tracing:
+    container_name: tracing
+    image: jaegertracing/all-in-one
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+    ports:
+      - 16686:16686
