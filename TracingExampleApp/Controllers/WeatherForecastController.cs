@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Trace.Configuration;
 
 namespace TracingExampleApp.Controllers
 {
@@ -17,15 +18,20 @@ namespace TracingExampleApp.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly TracerFactory tracerFactory;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, TracerFactory tracerFactory)
         {
             _logger = logger;
+            this.tracerFactory = tracerFactory;
         }
 
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            var tracer = tracerFactory.GetTracer("TracingExampleApp");
+            TestJaeger.DoWork(tracer);
+
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {

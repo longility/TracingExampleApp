@@ -8,7 +8,7 @@ namespace TracingExampleApp
 {
     internal class TestJaeger
     {
-        internal static object Run(string host, int port)
+        internal static void Run(string host, int port)
         {
             // Create a tracer.
             using var tracerFactory = TracerFactory.Create(
@@ -19,7 +19,11 @@ namespace TracingExampleApp
                     o.AgentPort = port;
                 }));
             var tracer = tracerFactory.GetTracer("jaeger-test");
+            DoWork(tracer);
+        }
 
+        public static void DoWork(Tracer tracer)
+        {
             // Create a scoped span. It will end automatically when using statement ends
             using (tracer.StartActiveSpan("Main", out var span))
             {
@@ -30,8 +34,6 @@ namespace TracingExampleApp
                     DoWork(i, tracer);
                 }
             }
-
-            return null;
         }
 
         private static void DoWork(int i, Tracer tracer)
@@ -45,7 +47,7 @@ namespace TracingExampleApp
                 try
                 {
                     Console.WriteLine("Doing busy work");
-                    Thread.Sleep(1000);
+                    Thread.Sleep(100);
                 }
                 catch (ArgumentOutOfRangeException e)
                 {

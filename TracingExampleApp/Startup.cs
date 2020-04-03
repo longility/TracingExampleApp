@@ -21,22 +21,15 @@ namespace TracingExampleApp
         {
             services.AddControllers();
 
-            TestJaeger.Run("tracing", 6831);
-
-            services.AddOpenTelemetry(builder =>
-            {
-                builder
-                .SetSampler(new OpenTelemetry.Trace.Samplers.AlwaysSampleSampler())
-                .UseJaeger(o =>
-                {
-
-                    o.ServiceName = "tracing-example-app";
-                    o.AgentHost = "tracing";
-                    o.AgentPort = 6831;
-                })
-                .AddRequestCollector()
-                .AddDependencyCollector();
-            });
+            // This works if changed to scope. I notice TracerFactory needs to dispose to push to jaeger for some reason.
+            services.AddSingleton(_ =>
+                TracerFactory.Create(
+                    builder => builder.UseJaeger(o =>
+                    {
+                        o.ServiceName = "TracingExampleApp";
+                        o.AgentHost = "tracing";
+                        o.AgentPort = 6831;
+                    })));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
