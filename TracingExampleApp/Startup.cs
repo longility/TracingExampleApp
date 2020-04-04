@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace.Configuration;
 
 namespace TracingExampleApp
@@ -21,12 +22,10 @@ namespace TracingExampleApp
         {
             services.AddControllers();
 
-            TestJaeger.Run("tracing", 6831);
-
             services.AddOpenTelemetry(builder =>
             {
                 builder
-                .SetSampler(new OpenTelemetry.Trace.Samplers.AlwaysSampleSampler())
+                .SetSampler(new OpenTelemetry.Trace.Samplers.AlwaysOnSampler())
                 .UseJaeger(o =>
                 {
 
@@ -34,6 +33,8 @@ namespace TracingExampleApp
                     o.AgentHost = "tracing";
                     o.AgentPort = 6831;
                 })
+                .SetResource(Resources.CreateServiceResource("tracing-example-app"))
+                .AddProcessorPipeline(pipelineBuilder => pipelineBuilder.AddProcessor(_ => new DebuggingSpanProcessor()))
                 .AddRequestCollector()
                 .AddDependencyCollector();
             });

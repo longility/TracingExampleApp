@@ -14,12 +14,19 @@ namespace TracingExampleApp
             using var tracerFactory = TracerFactory.Create(
                 builder => builder.UseJaeger(o =>
                 {
-                    o.ServiceName = "jaeger-test";
+                    o.ServiceName = "jaeger-test-1";
                     o.AgentHost = host;
                     o.AgentPort = port;
                 }));
-            var tracer = tracerFactory.GetTracer("jaeger-test");
+            var tracer = tracerFactory.GetTracer("jaeger-test-2");
 
+            Run(tracer);
+
+            return null;
+        }
+
+        internal static void Run(Tracer tracer)
+        {
             // Create a scoped span. It will end automatically when using statement ends
             using (tracer.StartActiveSpan("Main", out var span))
             {
@@ -30,8 +37,6 @@ namespace TracingExampleApp
                     DoWork(i, tracer);
                 }
             }
-
-            return null;
         }
 
         private static void DoWork(int i, Tracer tracer)
